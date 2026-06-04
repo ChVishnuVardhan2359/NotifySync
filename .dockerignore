@@ -1,0 +1,9 @@
+frontend/
+mobile/
+database/
+docs/
+.git/
+**/bin/
+**/obj/
+*.md
+*.apk
