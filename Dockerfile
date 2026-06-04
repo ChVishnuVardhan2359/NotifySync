@@ -16,4 +16,9 @@ ENV ASPNETCORE_URLS=http://+:10000
 # and uses the workstation GC which is friendlier to small (512 MB) free instances.
 ENV DOTNET_EnableWriteXorExecute=0
 ENV DOTNET_gcServer=0
+# .NET 8 SIGSEGVs in Render-free's gVisor sandbox when probing CPU SIMD features.
+# Disable hardware intrinsics + tiered JIT to use the safe software paths.
+ENV DOTNET_EnableHWIntrinsic=0
+ENV DOTNET_TieredCompilation=0
+ENV DOTNET_TieredPGO=0
 ENTRYPOINT ["dotnet", "NotifySync.Api.dll"]
