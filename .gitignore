@@ -1,0 +1,40 @@
+# .NET
+backend/**/bin/
+backend/**/obj/
+*.user
+
+# Node / Angular
+frontend/**/node_modules/
+frontend/**/dist/
+frontend/**/.angular/
+frontend/**/puppeteer/
+
+# Android
+mobile/**/build/
+mobile/**/.gradle/
+mobile/**/local.properties
+mobile/**/.cxx/
+*.hprof
+hs_err_pid*.log
+
+# Logs / env / secrets
+**/logs/
+*.log
+.env
+*.jks
+*.keystore
+deploy/k8s/01-secret.yaml
+deploy/k8s/05-tls-secret.yaml
+deploy/k8s/notifysync-all.yaml
+
+# OS / IDE
+.DS_Store
+.vs/
+.idea/
+.vscode/
+
+# Build artifacts
+*.apk
+backend/src/NotifySync.Api/wwwroot/downloads/
+
+deploy/k8s/*.zip

@@ -1,0 +1,56 @@
+# Ingress for the dashboard + API. Uses the NGINX ingress controller.
+# TLS certs are supplied via Kubernetes TLS secrets (see 05-tls-secret.example.yaml).
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: notifysync-web
+  namespace: notifysync
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    # If you use cert-manager, uncomment and set your issuer instead of supplying the secret yourself:
+    # cert-manager.io/cluster-issuer: "letsencrypt-prod"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts: [ "fs-notify.platform.kb.snovasys.com" ]
+      secretName: fs-notify-kb-snovasys-com-tls
+  rules:
+    - host: fs-notify.platform.kb.snovasys.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: notifysync-web
+                port: { number: 80 }
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: notifysync-api
+  namespace: notifysync
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    # SignalR / WebSockets need long-lived upstream connections.
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    # Allow the ~18 MB APK download/upload and batch payloads.
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    # cert-manager.io/cluster-issuer: "letsencrypt-prod"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts: [ "fs-notify.api.platform.kb.snovasys.com" ]
+      secretName: api-platform-kb-snovasys-com-tls
+  rules:
+    - host: fs-notify.api.platform.kb.snovasys.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: notifysync-api
+                port: { number: 80 }

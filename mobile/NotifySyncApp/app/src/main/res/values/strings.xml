@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">NotifySync</string>
+    <string name="sync_channel_name">Notification Sync</string>
+    <string name="sync_channel_desc">Background syncing of notifications</string>
+</resources>

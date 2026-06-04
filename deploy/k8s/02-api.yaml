@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notifysync-api
+  namespace: notifysync
+  labels: { app: notifysync-api }
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: notifysync-api }
+  template:
+    metadata:
+      labels: { app: notifysync-api }
+    spec:
+      containers:
+        - name: api
+          image: docker.io/vishnuvardhan2359/notifysync-api:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: "Production"
+            - name: ASPNETCORE_URLS
+              value: "http://+:8080"
+            # Allow the dashboard origin through CORS (overrides the "*" default).
+            - name: Cors__AllowedOrigins__0
+              value: "https://fs-notify.platform.kb.snovasys.com"
+            - name: ConnectionStrings__DefaultConnection
+              valueFrom:
+                secretKeyRef: { name: notifysync-secrets, key: ConnectionStrings__DefaultConnection }
+            - name: Jwt__Key
+              valueFrom:
+                secretKeyRef: { name: notifysync-secrets, key: Jwt__Key }
+          readinessProbe:
+            httpGet: { path: /api/health, port: 8080 }
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /api/health, port: 8080 }
+            initialDelaySeconds: 40
+            periodSeconds: 20
+          resources:
+            requests: { cpu: "100m", memory: "256Mi" }
+            limits: { cpu: "1000m", memory: "1Gi" }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: notifysync-api
+  namespace: notifysync
+spec:
+  selector: { app: notifysync-api }
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+  type: ClusterIP

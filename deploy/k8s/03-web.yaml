@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notifysync-web
+  namespace: notifysync
+  labels: { app: notifysync-web }
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: notifysync-web }
+  template:
+    metadata:
+      labels: { app: notifysync-web }
+    spec:
+      containers:
+        - name: web
+          image: docker.io/vishnuvardhan2359/notifysync-web:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+          readinessProbe:
+            httpGet: { path: /, port: 80 }
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests: { cpu: "50m", memory: "64Mi" }
+            limits: { cpu: "500m", memory: "256Mi" }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: notifysync-web
+  namespace: notifysync
+spec:
+  selector: { app: notifysync-web }
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+  type: ClusterIP

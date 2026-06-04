@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  - Allows cleartext (http://) so the app can reach a local/LAN dev server.
+  - Trusts the system CAs PLUS both Let's Encrypt roots (ISRG Root X1 + X2), so the app
+    works with Let's Encrypt TLS certs on ANY phone — including old devices whose trust
+    store lacks those roots (fixes "trust anchor for certification path not found"), and
+    it keeps working across cert renewals (RSA via X1, ECDSA via X2).
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="@raw/isrg_root_x1" />
+            <certificates src="@raw/isrg_root_x2" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

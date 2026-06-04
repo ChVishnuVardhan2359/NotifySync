@@ -1,0 +1,47 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: notifysync-pg
+    environment:
+      POSTGRES_DB: "notifysync"
+      POSTGRES_USER: "notifysync"
+      POSTGRES_PASSWORD: "${DB_PASSWORD:-NotifySyncPass123}"
+    ports:
+      - "5433:5432"
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U notifysync"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: ../backend
+      dockerfile: ../deploy/api.Dockerfile
+    container_name: notifysync-api
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Production"
+      ASPNETCORE_URLS: "http://+:8080"
+      ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=notifysync;Username=notifysync;Password=${DB_PASSWORD:-NotifySyncPass123}"
+      Jwt__Key: "${JWT_KEY:-ChangeThisToALongRandomProductionSigningKey_MinimumThirtyTwoChars!}"
+      Cors__AllowedOrigins__0: "http://localhost:8081"
+    ports:
+      - "8080:8080"
+
+  web:
+    build:
+      context: ../frontend/notifysync-web
+      dockerfile: ../../deploy/web.Dockerfile
+    container_name: notifysync-web
+    depends_on:
+      - api
+    ports:
+      - "8081:80"
+
+volumes:
+  pg-data:
