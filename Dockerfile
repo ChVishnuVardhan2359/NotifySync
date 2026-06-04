@@ -12,4 +12,8 @@ COPY --from=build /app/publish .
 # Render routes to port 10000 by default.
 EXPOSE 10000
 ENV ASPNETCORE_URLS=http://+:10000
+# Fixes SIGSEGV (exit 139) on restricted container hosts (seccomp blocks .NET's W^X JIT),
+# and uses the workstation GC which is friendlier to small (512 MB) free instances.
+ENV DOTNET_EnableWriteXorExecute=0
+ENV DOTNET_gcServer=0
 ENTRYPOINT ["dotnet", "NotifySync.Api.dll"]
