@@ -13,6 +13,7 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.SystemUpdate
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
@@ -50,9 +51,12 @@ fun SyncStatusScreen(
     val pending by vm.pendingCount.collectAsState()
     val selected by vm.selectedPackages.collectAsState()
     val status by vm.syncStatus.collectAsState()
+    val updateInfo by vm.updateInfo.collectAsState()
+    val updating by vm.updating.collectAsState()
 
     // Keep the sync counters live while this screen is open.
     LaunchedEffect(Unit) {
+        vm.checkForUpdate()
         while (true) {
             vm.loadSyncStatus()
             delay(8_000)
@@ -65,6 +69,32 @@ fun SyncStatusScreen(
     ) {
         Text("Hi, ${displayName.ifBlank { "there" }}", style = MaterialTheme.typography.headlineSmall)
         Text("Notification sync status", style = MaterialTheme.typography.bodyMedium)
+
+        // Update-available card (installs over the current app — no uninstall needed).
+        updateInfo?.let { info ->
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon(
+                        Icons.Filled.SystemUpdate,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(28.dp),
+                    )
+                    Column(modifier = Modifier.padding(start = 12.dp).weight(1f)) {
+                        Text("Update available — v${info.version}", style = MaterialTheme.typography.titleMedium)
+                        Text("Installs over the current app — no need to uninstall.", style = MaterialTheme.typography.bodySmall)
+                    }
+                }
+                Button(
+                    onClick = { vm.runUpdate { } },
+                    enabled = !updating,
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).padding(bottom = 16.dp),
+                ) { Text(if (updating) "Downloading…" else "Update now") }
+            }
+        }
 
         // Live "what's synced to the website" card.
         Card(modifier = Modifier.fillMaxWidth()) {

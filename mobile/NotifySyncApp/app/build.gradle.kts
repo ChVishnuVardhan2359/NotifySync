@@ -12,8 +12,8 @@ android {
         applicationId = "com.notifysync.app"
         minSdk = 26
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 4
+        versionName = "1.3.0"
 
         // Default API base URL. For an emulator talking to a host machine, use 10.0.2.2.
         // Override at build time with: -PapiBaseUrl="http://your-server:5080/"

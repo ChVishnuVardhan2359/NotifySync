@@ -1,7 +1,6 @@
-// Production build. The dashboard and API are served on separate domains,
-// so the API base URL is absolute (and CORS on the API must allow this origin).
+// Production build (GitHub Pages dashboard -> Railway API -> Neon Postgres).
 export const environment = {
   production: true,
-  apiUrl: 'https://fs-notify.api.platform.kb.snovasys.com/api',
-  hubUrl: 'https://fs-notify.api.platform.kb.snovasys.com/hubs/notifications',
+  apiUrl: 'https://api-production-60bb9.up.railway.app/api',
+  hubUrl: 'https://api-production-60bb9.up.railway.app/hubs/notifications',
 };

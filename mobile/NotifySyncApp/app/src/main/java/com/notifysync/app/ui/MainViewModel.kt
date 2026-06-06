@@ -4,10 +4,12 @@ import android.app.Application
 import android.content.pm.ApplicationInfo
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.notifysync.app.data.api.AppInfoDto
 import com.notifysync.app.data.api.CallDto
 import com.notifysync.app.data.api.NotificationDto
 import com.notifysync.app.data.api.SmsDto
 import com.notifysync.app.data.repository.DeviceDataRepository
+import com.notifysync.app.util.UpdateManager
 import com.notifysync.app.data.local.TokenStore
 import com.notifysync.app.data.repository.AuthRepository
 import com.notifysync.app.data.repository.SyncRepository
@@ -71,6 +73,30 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
     private val _syncStatus = MutableStateFlow(SyncStatus())
     val syncStatus: StateFlow<SyncStatus> = _syncStatus.asStateFlow()
+
+    // ---- In-app update ----
+    private val _updateInfo = MutableStateFlow<AppInfoDto?>(null)
+    val updateInfo: StateFlow<AppInfoDto?> = _updateInfo.asStateFlow()
+    private val _updating = MutableStateFlow(false)
+    val updating: StateFlow<Boolean> = _updating.asStateFlow()
+
+    fun checkForUpdate() {
+        viewModelScope.launch { _updateInfo.value = UpdateManager.available(tokenStore) }
+    }
+
+    fun runUpdate(onResult: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            _updating.value = true
+            val file = UpdateManager.download(getApplication(), tokenStore)
+            _updating.value = false
+            if (file != null) {
+                UpdateManager.install(getApplication(), file)
+                onResult(true)
+            } else {
+                onResult(false)
+            }
+        }
+    }
 
     fun loadSyncStatus() {
         viewModelScope.launch {

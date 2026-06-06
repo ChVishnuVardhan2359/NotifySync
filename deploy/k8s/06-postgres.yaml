@@ -1,0 +1,69 @@
+# In-cluster PostgreSQL for NotifySync (so you don't need an external DB server).
+# Uses POSTGRES_PASSWORD from the notifysync-secrets secret.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: notifysync-postgres-data
+  namespace: notifysync
+spec:
+  accessModes: [ "ReadWriteOnce" ]
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notifysync-postgres
+  namespace: notifysync
+  labels: { app: notifysync-postgres }
+spec:
+  replicas: 1
+  strategy: { type: Recreate }
+  selector:
+    matchLabels: { app: notifysync-postgres }
+  template:
+    metadata:
+      labels: { app: notifysync-postgres }
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_DB
+              value: "notifysync"
+            - name: POSTGRES_USER
+              value: "notifysync"
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef: { name: notifysync-secrets, key: POSTGRES_PASSWORD }
+            - name: PGDATA
+              value: "/var/lib/postgresql/data/pgdata"
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+          readinessProbe:
+            exec: { command: ["pg_isready", "-U", "notifysync"] }
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            requests: { cpu: "100m", memory: "256Mi" }
+            limits: { cpu: "1000m", memory: "1Gi" }
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: notifysync-postgres-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: notifysync-postgres
+  namespace: notifysync
+spec:
+  selector: { app: notifysync-postgres }
+  ports:
+    - port: 5432
+      targetPort: 5432
+  type: ClusterIP

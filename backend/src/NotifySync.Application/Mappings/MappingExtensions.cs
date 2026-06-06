@@ -5,8 +5,11 @@ namespace NotifySync.Application.Mappings;
 
 public static class MappingExtensions
 {
-    /// <summary>A device counts as "online" if it sent a heartbeat within this window.</summary>
-    public static readonly TimeSpan OnlineWindow = TimeSpan.FromMinutes(2);
+    /// <summary>
+    /// A device counts as "online" if it sent a heartbeat within this window. It's generous
+    /// (longer than the phone's Doze wake-up interval) so devices stay "online" while idle.
+    /// </summary>
+    public static readonly TimeSpan OnlineWindow = TimeSpan.FromMinutes(25);
 
     public static DeviceDto ToDto(this Device device, DateTime utcNow)
     {

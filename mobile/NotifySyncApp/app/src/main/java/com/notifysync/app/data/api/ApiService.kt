@@ -23,6 +23,9 @@ interface ApiService {
     @GET("api/device/sync-pending")
     suspend fun syncPending(@Query("identifier") identifier: String): Response<SyncPendingResponse>
 
+    @GET("api/app/info")
+    suspend fun getAppInfo(): Response<AppInfoDto>
+
     @GET("api/notifications")
     suspend fun getNotifications(
         @Query("page") page: Int,

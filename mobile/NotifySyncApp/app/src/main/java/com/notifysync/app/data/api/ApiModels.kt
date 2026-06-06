@@ -33,6 +33,15 @@ data class HeartbeatRequest(val deviceIdentifier: String)
 data class SyncPendingResponse(val pending: Boolean)
 
 @JsonClass(generateAdapter = true)
+data class AppInfoDto(
+    val available: Boolean,
+    val fileName: String,
+    val version: String,
+    val versionCode: Int,
+    val sizeBytes: Long,
+)
+
+@JsonClass(generateAdapter = true)
 data class DeviceDto(
     val id: Int,
     val deviceName: String,

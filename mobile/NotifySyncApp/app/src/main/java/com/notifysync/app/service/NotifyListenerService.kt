@@ -71,6 +71,7 @@ class NotifyListenerService : NotificationListenerService() {
                 if (!markNew(key)) continue
                 repo.enqueue(
                     PendingNotification(
+                        eventKey = key,
                         appName = appName,
                         packageName = packageName,
                         title = c.title,

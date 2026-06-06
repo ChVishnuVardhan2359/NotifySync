@@ -29,6 +29,7 @@ public class AppController : ControllerBase
             available = exists,
             fileName = "NotifySync.apk",
             version = _config["AppDownload:Version"] ?? "1.0.0",
+            versionCode = int.TryParse(_config["AppDownload:VersionCode"], out var vc) ? vc : 1,
             sizeBytes = exists ? new FileInfo(path).Length : 0,
         });
     }
